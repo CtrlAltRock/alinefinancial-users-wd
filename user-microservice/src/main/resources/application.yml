@@ -40,3 +40,7 @@ app:
       access-key-id: "${APP_USER_ACCESS_KEY}"
       secret-access-key: "${APP_USER_SECRET_KEY}"
 
+logging:
+  file:
+    path: "../home/Documents/logs"
+    name: "app.log"

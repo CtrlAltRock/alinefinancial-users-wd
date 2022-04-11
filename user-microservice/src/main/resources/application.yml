@@ -1,5 +1,5 @@
 server:
-  port: ${APP_PORT}
+  port: 8080
 
 spring:
   profiles:
@@ -11,10 +11,10 @@ spring:
       ddl-auto: update
     show-sql: false
   datasource:
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: "root"
+    password: "password"
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+    url: "jdbc:mysql://localhost:3306/aline_financial"
     initialization-mode: always
 
 
@@ -28,9 +28,9 @@ app:
     from: "no-reply@alinefinancial.com"
     enable: true
   security:
-    secret-key: "${ENCRYPT_SECRET_KEY}"
+    secret-key: "xBnkRrjIeZvtl3864JbRjg5rpLhZPneH"
     jwt:
-      secret-key: "${JWT_SECRET_KEY}"
+      secret-key: "7y5Phi01FZzd60UJMkGinerMiBgNy4DP"
   aws:
     email:
       template-bucket-name: "aline-email-templates"

@@ -18,6 +18,7 @@ import com.aline.usermicroservice.service.AvatarService;
 import com.aline.usermicroservice.service.ResetPasswordService;
 import com.aline.usermicroservice.service.UserConfirmationService;
 import com.aline.usermicroservice.service.UserService;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -66,6 +67,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User does not exist.")
     })
     @GetMapping("/{id}")
+    @Timed("users-get-id")
     public ResponseEntity<UserResponse> getUserById(@PathVariable long id) {
         UserResponse userResponse = userService.getUserById(id);
         return ResponseEntity
@@ -76,6 +78,7 @@ public class UserController {
 
 	@Operation(description = "Update avatar image for a user")
 	@PutMapping("/current/avatar")
+    @Timed("users-put-avatar")
 	public ResponseEntity<Void> putAvatar(
 			@CurrentSecurityContext(expression = "authentication") Authentication authentication,
 			@RequestBody UserAvatarRequest image) {
@@ -86,6 +89,7 @@ public class UserController {
 
 	@Operation(description = "Get avatar image for a user")
 	@GetMapping("/current/avatar")
+    @Timed("users-get-avatar")
 	public ResponseEntity<UserAvatarRequest> getAvatar(
 			@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
 		UserResponse currentUser = userService.getCurrentUser(authentication);
@@ -97,6 +101,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Paginated response was sent. It may have an empty content array which means there are no users.")
     })
     @GetMapping
+    @Timed("users-get-all")
     public ResponseEntity<Page<UserResponse>> getAllUsers(Pageable pageable,
                                                           @RequestParam(defaultValue = "") String search,
                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
@@ -115,6 +120,7 @@ public class UserController {
             @ApiResponse(responseCode = "502", description = "The user registration confirmation email was not sent.")
     })
     @PostMapping("/registration")
+    @Timed("users-register")
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRegistration registration) {
         // Create a registration token for a member user when registration is successful.
         UserResponse response = userService.registerUser(registration, user -> {
@@ -146,6 +152,7 @@ public class UserController {
             @ApiResponse(responseCode = "410", description = "Token does not exist or is expired.")
     })
     @PostMapping("/confirmation")
+    @Timed("users-confirm")
     public ResponseEntity<ConfirmUserRegistrationResponse> confirmUserRegistration(@Valid @RequestBody ConfirmUserRegistration confirmUserRegistration) {
 
         UserRegistrationToken token = confirmationService.getTokenById(confirmUserRegistration.getToken());
@@ -170,6 +177,7 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "One-time passcode was not sent through either SMS or Email.")
     })
     @PostMapping("/password-reset-otp")
+    @Timed("users-create-password-reset")
     public ResponseEntity<Void> createPasswordResetOtp(@Valid @RequestBody ResetPasswordAuthentication resetPasswordAuthentication) {
         passwordService.createResetPasswordRequest(resetPasswordAuthentication,
                 (otp, user) -> {
@@ -200,6 +208,7 @@ public class UserController {
             @ApiResponse(responseCode = "")
     })
     @PutMapping("/password-reset")
+    @Timed("users-reset-password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordService.resetPassword(request);
         return ResponseEntity.ok().build();
@@ -217,6 +226,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "One-time passcode was not correct and was not verified.")
     })
     @PostMapping("/otp-authentication")
+    @Timed("users-authenticate-otp")
     public ResponseEntity<Void> authenticateOtp(@Valid @RequestBody OtpAuthentication authentication) {
         passwordService.verifyOtp(authentication.getOtp(), authentication.getUsername());
         return ResponseEntity.ok().build();
@@ -233,6 +243,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Not authorized to access the user.")
     })
     @GetMapping("/current")
+    @Timed("users-get-current")
     public ResponseEntity<UserResponse> getCurrentUser(@CurrentSecurityContext(expression = "authentication")
                                                        Authentication authentication) {
         UserResponse currentUser = userService.getCurrentUser(authentication);
@@ -249,6 +260,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Not authorized to access the user profile")
     })
     @GetMapping("/{id}/profile")
+    @Timed("users-get-profile")
     public ResponseEntity<UserProfile> getUserProfile(@PathVariable long id) {
         UserProfile profile = userService.getUserProfileById(id);
         return ResponseEntity
@@ -264,6 +276,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Not authorized to access the user profile")
     })
     @GetMapping("/current/profile")
+    @Timed("users-current-profile")
     public ResponseEntity<UserProfile> getCurrentUserProfile(@CurrentSecurityContext(expression = "authentication")
                                                              Authentication authentication) {
         UserProfile currentProfile = userService.getCurrentUserProfile(authentication);
@@ -275,6 +288,7 @@ public class UserController {
 
     @Operation(description = "Update user profile by user ID")
     @PutMapping("/{id}/profile")
+    @Timed("users-put-profile")
     public ResponseEntity<Void> updateUserProfileById(@PathVariable long id, @RequestBody UserProfileUpdate update) {
         userService.updateUserProfile(id, update);
         return ResponseEntity
@@ -284,6 +298,7 @@ public class UserController {
 
     @Operation(description = "Update current logged-in user profile")
     @PutMapping("/current/profile")
+    @Timed("users-put-current-profile")
     public ResponseEntity<Void> updateUserProfileById(@CurrentSecurityContext(expression = "authentication")
                                                       Authentication authentication, @RequestBody UserProfileUpdate update) {
         userService.updateCurrentUserProfile(authentication, update);
@@ -294,6 +309,7 @@ public class UserController {
 
 	@Operation(description = "Disable/Enabled current logged-in user profile")
 	@PutMapping("/current/profile/status")
+    @Timed("users-current-profile-status")
 	public ResponseEntity<Void> disableUserProfileById(
 			@CurrentSecurityContext(expression = "authentication") Authentication authentication,
 			@RequestBody Boolean status) {

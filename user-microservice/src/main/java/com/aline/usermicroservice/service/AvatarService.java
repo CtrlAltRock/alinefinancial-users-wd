@@ -42,6 +42,7 @@ public class AvatarService {
 			byte[] imageArray = Base64.getDecoder().decode(base64);
 			UserAvatar blackImage = new UserAvatar(id, imageArray);
 			avatarRepository.save(blackImage);
+			//
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
